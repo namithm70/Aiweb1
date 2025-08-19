@@ -3,9 +3,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import ReactMarkdown from 'react-markdown';
-import { useAuth } from '../hooks/useAuth';
-import { useDocuments } from '../hooks/useDocuments';
-import { useChat } from '../hooks/useChat';
+import { useAuth } from '@/hooks/useAuth';
+import { useDocuments } from '@/hooks/useDocuments';
+import { useChat } from '@/hooks/useChat';
 import { 
   PaperAirplaneIcon,
   DocumentTextIcon,
@@ -16,6 +16,7 @@ import {
   ClipboardDocumentIcon
 } from '@heroicons/react/24/outline';
 import { ChatMessage, Citation } from '@/types';
+import Layout from '@/components/Layout';
 
 const ChatPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -130,7 +131,8 @@ const ChatPage = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto flex h-[calc(100vh-8rem)]">
+    <Layout>
+      <div className="max-w-6xl mx-auto flex h-[calc(100vh-8rem)]">
       {/* Document Selector Sidebar */}
       <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
@@ -288,7 +290,8 @@ const ChatPage = () => {
           </form>
         </div>
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 };
 
