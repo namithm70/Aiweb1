@@ -328,11 +328,12 @@ async def ask_question(question_data: dict):
     if not context:
         # Return streaming response even when no documents
         async def generate_no_docs():
-            yield f"data: {json.dumps({'type': 'token', 'content': 'I don\'t have any documents to search through. Please upload some PDF documents first.'})}\n\n"
+            message = "I don't have any documents to search through. Please upload some PDF documents first."
+            yield f"data: {json.dumps({'type': 'token', 'content': message})}\n\n"
             final_response = {
                 "type": "complete",
                 "final_response": {
-                    "answer": "I don't have any documents to search through. Please upload some PDF documents first.",
+                    "answer": message,
                     "citations": [],
                     "latency_ms": 50,
                     "usage": {"retrieved_docs": 0, "total_tokens": 0}
