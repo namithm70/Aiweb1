@@ -25,25 +25,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Initialize auth state on mount
     const initAuth = async () => {
       const savedToken = localStorage.getItem('auth_token');
+      const savedUser = localStorage.getItem('user');
+      
       if (savedToken) {
-        try {
-          setAuthToken(savedToken);
-          const user = await authApi.getCurrentUser();
-          setState({
-            user,
-            token: savedToken,
-            loading: false,
-            error: undefined,
-          });
-        } catch (error) {
-          // Token is invalid
-          setAuthToken(null);
-          setState({
-            user: null,
-            token: null,
-            loading: false,
-            error: undefined,
-          });
+        // Check if it's a temporary token
+        if (savedToken === 'temp_token_123' && savedUser) {
+          try {
+            const user = JSON.parse(savedUser);
+            setAuthToken(savedToken);
+            setState({
+              user,
+              token: savedToken,
+              loading: false,
+              error: undefined,
+            });
+          } catch (error) {
+            // Invalid user data
+            setAuthToken(null);
+            localStorage.removeItem('user');
+            setState({
+              user: null,
+              token: null,
+              loading: false,
+              error: undefined,
+            });
+          }
+        } else {
+          // Regular backend token
+          try {
+            setAuthToken(savedToken);
+            const user = await authApi.getCurrentUser();
+            setState({
+              user,
+              token: savedToken,
+              loading: false,
+              error: undefined,
+            });
+          } catch (error) {
+            // Token is invalid
+            setAuthToken(null);
+            setState({
+              user: null,
+              token: null,
+              loading: false,
+              error: undefined,
+            });
+          }
         }
       } else {
         setState(prev => ({ ...prev, loading: false }));
@@ -101,6 +128,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     setAuthToken(null);
+    localStorage.removeItem('user'); // Also remove user data
     setState({
       user: null,
       token: null,
