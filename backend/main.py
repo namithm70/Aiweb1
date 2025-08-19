@@ -35,16 +35,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware
+# CORS middleware - Allow all origins for development/production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000", 
-        "http://127.0.0.1:3000",
-        "https://aiweb1.vercel.app",  # Vercel frontend
-        "https://aiweb1-git-main-namithm70.vercel.app",  # Vercel preview deployments
-        "https://*.vercel.app"  # All Vercel subdomains
-    ],
+    allow_origins=["*"],  # Allow all origins for now
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
