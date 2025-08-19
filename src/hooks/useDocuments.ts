@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Document, DocumentListState } from '../types';
-import { documentApi, handleApiError } from '../lib/api';
+import { documentApi, handleApiError } from './api';
 
 export const useDocuments = () => {
   const [state, setState] = useState<DocumentListState>({

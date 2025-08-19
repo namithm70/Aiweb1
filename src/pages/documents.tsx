@@ -14,7 +14,7 @@ import {
   ClockIcon,
   XCircleIcon
 } from '@heroicons/react/24/outline';
-import { formatFileSize, formatDate } from '../lib/api';
+import { formatFileSize, formatDate } from '../hooks/api';
 import { Document } from '../types';
 import Layout from '../components/Layout';
 
