@@ -3,8 +3,8 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { useAuth } from '@/hooks/useAuth';
-import { useDocuments } from '@/hooks/useDocuments';
+import { useAuth } from '../hooks/useAuth';
+import { useDocuments } from '../hooks/useDocuments';
 import { 
   DocumentTextIcon, 
   ChatBubbleLeftRightIcon, 
@@ -18,8 +18,8 @@ import {
   BoltIcon,
   ChartBarIcon
 } from '@heroicons/react/24/outline';
-import { formatFileSize, formatDate } from '@/lib/api';
-import Layout from '@/components/Layout';
+import { formatFileSize, formatDate } from '../lib/api';
+import Layout from '../components/Layout';
 
 const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
