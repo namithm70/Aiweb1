@@ -80,8 +80,8 @@ async def startup_event():
 async def root():
     """Root endpoint."""
     return {
-        "message": "PDF-QA with RAG API", 
-        "version": "1.0.0",
+        "message": "PDF-QA with RAG API - Updated", 
+        "version": "1.0.1",
         "status": "running",
         "timestamp": datetime.utcnow().isoformat()
     }
