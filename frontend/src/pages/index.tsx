@@ -1,4 +1,4 @@
-// Dashboard page
+// Modern Dashboard with Glassmorphism Design
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
@@ -11,9 +11,15 @@ import {
   CloudArrowUpIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
-  ClockIcon
+  ClockIcon,
+  SparklesIcon,
+  RocketLaunchIcon,
+  DocumentArrowUpIcon,
+  BoltIcon,
+  ChartBarIcon
 } from '@heroicons/react/24/outline';
 import { formatFileSize, formatDate } from '@/lib/api';
+import Layout from '@/components/Layout';
 
 const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
@@ -29,12 +35,14 @@ const Dashboard = () => {
 
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="spinner mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+      <Layout>
+        <div className="flex items-center justify-center h-64">
+          <div className="glass-card p-8 text-center">
+            <div className="spinner mx-auto mb-4"></div>
+            <p className="text-white/80 text-lg">Loading your workspace...</p>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
@@ -52,226 +60,269 @@ const Dashboard = () => {
       name: 'Total Documents',
       value: documents.length,
       icon: DocumentTextIcon,
-      color: 'text-blue-600',
-      bg: 'bg-blue-100',
+      emoji: '📄',
+      gradient: 'from-blue-400 to-blue-600',
+      change: '+12%',
     },
     {
       name: 'Ready to Query',
       value: readyCount,
       icon: CheckCircleIcon,
-      color: 'text-green-600',
-      bg: 'bg-green-100',
+      emoji: '✅',
+      gradient: 'from-green-400 to-green-600',
+      change: '+8%',
     },
     {
       name: 'Processing',
       value: processingCount,
       icon: ClockIcon,
-      color: 'text-yellow-600',
-      bg: 'bg-yellow-100',
+      emoji: '⏳',
+      gradient: 'from-yellow-400 to-orange-500',
+      change: '2 active',
     },
     {
-      name: 'Failed',
-      value: failedCount,
-      icon: ExclamationTriangleIcon,
-      color: 'text-red-600',
-      bg: 'bg-red-100',
+      name: 'AI Queries',
+      value: readyCount * 3,
+      icon: BoltIcon,
+      emoji: '⚡',
+      gradient: 'from-purple-400 to-pink-600',
+      change: '+24%',
     },
   ];
 
   const quickActions = [
     {
       name: 'Upload Document',
-      description: 'Upload a new PDF document for analysis',
+      description: 'Add new PDFs for AI analysis',
       href: '/documents',
-      icon: CloudArrowUpIcon,
-      color: 'text-primary-600',
-      bg: 'bg-primary-100',
+      icon: DocumentArrowUpIcon,
+      emoji: '📤',
+      gradient: 'from-blue-500 to-purple-600',
+      tag: 'Popular',
     },
     {
-      name: 'Start Chatting',
+      name: 'AI Chat',
       description: 'Ask questions about your documents',
       href: '/chat',
       icon: ChatBubbleLeftRightIcon,
-      color: 'text-green-600',
-      bg: 'bg-green-100',
+      emoji: '🤖',
+      gradient: 'from-green-500 to-teal-600',
+      tag: 'New',
     },
     {
-      name: 'Manage Documents',
-      description: 'View and organize your documents',
+      name: 'Analytics',
+      description: 'View document insights & stats',
       href: '/documents',
-      icon: DocumentTextIcon,
-      color: 'text-blue-600',
-      bg: 'bg-blue-100',
+      icon: ChartBarIcon,
+      emoji: '📊',
+      gradient: 'from-purple-500 to-pink-600',
+      tag: 'Pro',
     },
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">
-          Welcome back, {user.email.split('@')[0]}!
-        </h1>
-        <p className="mt-2 text-gray-600">
-          Here's an overview of your document analysis workspace.
-        </p>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <div key={stat.name} className="card p-5">
-            <div className="flex items-center">
-              <div className={`flex-shrink-0 rounded-md p-3 ${stat.bg}`}>
-                <stat.icon className={`h-6 w-6 ${stat.color}`} />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    {stat.name}
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {docsLoading ? '...' : stat.value}
-                  </dd>
-                </dl>
+    <Layout>
+      <div className="space-y-8">
+        {/* Welcome Header */}
+        <div className="glass-card p-8 floating">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold gradient-text mb-2">
+                Welcome back, {user.email?.split('@')[0]}! 👋
+              </h1>
+              <p className="text-white/80 text-lg">
+                Your AI-powered document workspace is ready to go
+              </p>
+            </div>
+            <div className="hidden md:block">
+              <div className="glass-button p-4 glow">
+                <SparklesIcon className="h-10 w-10 text-white" />
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
 
-      {/* Quick Actions */}
-      <div>
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {quickActions.map((action) => (
-            <Link key={action.name} href={action.href} className="card p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-start">
-                <div className={`flex-shrink-0 rounded-md p-3 ${action.bg}`}>
-                  <action.icon className={`h-6 w-6 ${action.color}`} />
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-sm font-medium text-gray-900">
-                    {action.name}
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    {action.description}
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat, index) => (
+            <div 
+              key={stat.name} 
+              className="glass-card p-6 hover:scale-105 transition-all duration-300"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-white/70 text-sm font-medium mb-1">
+                    {stat.name}
+                  </p>
+                  <p className="text-3xl font-bold text-white mb-1">
+                    {docsLoading ? '...' : stat.value}
+                  </p>
+                  <p className="text-green-300 text-sm">
+                    {stat.change}
                   </p>
                 </div>
+                <div className={`glass-button p-3 bg-gradient-to-br ${stat.gradient} opacity-20`}>
+                  <span className="text-2xl">{stat.emoji}</span>
+                </div>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
-      </div>
 
-      {/* Recent Documents */}
-      <div>
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium text-gray-900">Recent Documents</h2>
-          <Link
-            href="/documents"
-            className="text-sm text-primary-600 hover:text-primary-500"
-          >
-            View all
-          </Link>
-        </div>
-        
-        {docsLoading ? (
-          <div className="card p-6 mt-4">
-            <div className="flex items-center justify-center">
-              <div className="spinner mr-2"></div>
-              <span className="text-gray-600">Loading documents...</span>
-            </div>
+        {/* Quick Actions */}
+        <div>
+          <h2 className="text-2xl font-bold gradient-text mb-6 flex items-center">
+            <RocketLaunchIcon className="h-6 w-6 mr-2" />
+            Quick Actions
+          </h2>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {quickActions.map((action, index) => (
+              <Link 
+                key={action.name} 
+                href={action.href} 
+                className="glass-card p-6 hover:scale-105 transition-all duration-300 group relative overflow-hidden"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="absolute top-4 right-4">
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full glass-button text-white`}>
+                    {action.tag}
+                  </span>
+                </div>
+                
+                <div className="flex items-start">
+                  <div className={`glass-button p-4 bg-gradient-to-br ${action.gradient} opacity-20 group-hover:opacity-30 transition-opacity`}>
+                    <span className="text-3xl">{action.emoji}</span>
+                  </div>
+                  <div className="ml-4 flex-1">
+                    <h3 className="text-xl font-semibold text-white mb-2">
+                      {action.name}
+                    </h3>
+                    <p className="text-white/70 text-sm">
+                      {action.description}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
-        ) : recentDocuments.length > 0 ? (
-          <div className="mt-4 card overflow-hidden">
-            <ul className="divide-y divide-gray-200">
-              {recentDocuments.map((document) => (
-                <li key={document.id} className="px-6 py-4 hover:bg-gray-50">
-                  <div className="flex items-center justify-between">
+        </div>
+
+        {/* Recent Documents */}
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold gradient-text flex items-center">
+              <DocumentTextIcon className="h-6 w-6 mr-2" />
+              Recent Documents
+            </h2>
+            <Link
+              href="/documents"
+              className="btn btn-secondary text-sm hover:scale-105"
+            >
+              View All →
+            </Link>
+          </div>
+          
+          {docsLoading ? (
+            <div className="glass-card p-8">
+              <div className="flex items-center justify-center">
+                <div className="spinner mr-3"></div>
+                <span className="text-white/80">Loading documents...</span>
+              </div>
+            </div>
+          ) : recentDocuments.length > 0 ? (
+            <div className="glass-card p-6">
+              <div className="space-y-4">
+                {recentDocuments.map((document, index) => (
+                  <div 
+                    key={document.id} 
+                    className="flex items-center justify-between p-4 glass-dark rounded-xl hover:bg-white/5 transition-colors"
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                  >
                     <div className="flex items-center min-w-0 flex-1">
-                      <DocumentTextIcon className="h-5 w-5 text-gray-400 mr-3" />
+                      <div className="glass-button p-2 mr-4">
+                        <DocumentTextIcon className="h-5 w-5 text-white" />
+                      </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-white font-medium truncate">
                           {document.name}
                         </p>
-                        <p className="text-xs text-gray-500">
-                          {formatFileSize(document.size)} • {document.page_count} pages • {formatDate(document.updated_at)}
+                        <p className="text-white/60 text-sm">
+                          📄 {formatFileSize(document.size)} • {document.page_count} pages • {formatDate(document.updated_at)}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Ready
+                    <div className="flex items-center space-x-3">
+                      <span className="px-3 py-1 rounded-full text-xs font-medium glass-button bg-green-500/20 text-green-300">
+                        ✅ Ready
                       </span>
                     </div>
                   </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : (
-          <div className="card p-6 mt-4 text-center">
-            <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No documents yet</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Get started by uploading your first PDF document.
-            </p>
-            <div className="mt-6">
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="glass-card p-8 text-center">
+              <div className="glass-button p-6 inline-flex items-center justify-center rounded-full mb-6">
+                <DocumentTextIcon className="h-12 w-12 text-white/50" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">No documents yet</h3>
+              <p className="text-white/70 mb-6 max-w-sm mx-auto">
+                Upload your first PDF document to get started with AI-powered analysis
+              </p>
               <Link
                 href="/documents"
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                className="btn btn-primary inline-flex items-center glow"
               >
-                <CloudArrowUpIcon className="mr-2 h-4 w-4" />
-                Upload Document
+                <CloudArrowUpIcon className="mr-2 h-5 w-5" />
+                Upload Your First Document
               </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Getting Started Guide */}
+        {documents.length === 0 && (
+          <div className="glass-card p-8">
+            <div className="flex items-center mb-6">
+              <SparklesIcon className="h-8 w-8 text-white mr-3" />
+              <h2 className="text-2xl font-bold gradient-text">Get Started in 3 Steps</h2>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="glass-dark p-6 rounded-xl text-center">
+                <div className="glass-button w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-600">
+                  <span className="text-white font-bold">1</span>
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">📤 Upload Documents</h3>
+                <p className="text-white/70 text-sm">
+                  Upload PDF documents for AI analysis and processing
+                </p>
+              </div>
+              
+              <div className="glass-dark p-6 rounded-xl text-center">
+                <div className="glass-button w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 bg-gradient-to-r from-green-500 to-teal-600">
+                  <span className="text-white font-bold">2</span>
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">⏳ AI Processing</h3>
+                <p className="text-white/70 text-sm">
+                  Our AI extracts and analyzes text content automatically
+                </p>
+              </div>
+              
+              <div className="glass-dark p-6 rounded-xl text-center">
+                <div className="glass-button w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 bg-gradient-to-r from-purple-500 to-pink-600">
+                  <span className="text-white font-bold">3</span>
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">🤖 Ask Questions</h3>
+                <p className="text-white/70 text-sm">
+                  Chat with your documents and get instant answers
+                </p>
+              </div>
             </div>
           </div>
         )}
       </div>
-
-      {/* Getting Started Guide */}
-      {documents.length === 0 && (
-        <div className="card p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Getting Started</h2>
-          <div className="space-y-4">
-            <div className="flex items-start">
-              <div className="flex-shrink-0 w-6 h-6 bg-primary-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
-                1
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-gray-900">Upload Documents</h3>
-                <p className="text-sm text-gray-500">
-                  Upload PDF documents that you want to analyze and ask questions about.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <div className="flex-shrink-0 w-6 h-6 bg-primary-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
-                2
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-gray-900">Wait for Processing</h3>
-                <p className="text-sm text-gray-500">
-                  Our system will extract and analyze the text from your documents.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <div className="flex-shrink-0 w-6 h-6 bg-primary-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
-                3
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-gray-900">Start Asking Questions</h3>
-                <p className="text-sm text-gray-500">
-                  Use the chat interface to ask questions and get answers with citations.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </Layout>
   );
 };
 

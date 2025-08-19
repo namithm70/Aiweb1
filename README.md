@@ -1,4 +1,4 @@
-# PDF-QA with RAG
+# 📄 PDF-QA with RAG 🚀
 
 A comprehensive PDF question-answering application built with RAG (Retrieval-Augmented Generation) using LangChain, FastAPI, and React.
 
