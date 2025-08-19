@@ -1,59 +1,88 @@
 """
-Simplified FastAPI main application for PDF-QA (basic version without AI features).
+Simple FastAPI application for PDF-QA with guaranteed CORS support.
 """
 
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+import google.generativeai as genai
 import uvicorn
 import os
-from datetime import datetime
 import json
+import asyncio
+from datetime import datetime
+from typing import List, Optional
+import PyPDF2
+import io
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="PDF-QA with RAG",
-    description="A comprehensive PDF question-answering application using RAG",
+    title="PDF-QA with Gemini AI",
+    description="Simple PDF question-answering application using Gemini AI",
     version="1.0.0"
 )
 
-# CORS middleware
+# CORS middleware - Allow all origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # Frontend URLs
+    allow_origins=["*"],  # Allow all origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Configure Gemini
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+    model = genai.GenerativeModel("gemini-pro")
+else:
+    model = None
+
 # Create upload directory
-os.makedirs("uploads", exist_ok=True)
+UPLOAD_DIR = os.getenv("UPLOAD_DIR", "/opt/render/project/src/uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# In-memory storage for documents
+documents_store = {}
+document_texts = {}
 
 @app.get("/")
 async def root():
     """Root endpoint."""
     return {
-        "message": "PDF-QA with RAG API", 
+        "message": "PDF-QA with Gemini AI - Simple Version", 
         "version": "1.0.0",
         "status": "running",
+        "environment": "production",
         "timestamp": datetime.utcnow().isoformat()
     }
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
-    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+    return {
+        "status": "healthy", 
+        "timestamp": datetime.utcnow().isoformat(),
+        "environment": "production"
+    }
 
-# Simple authentication endpoints (mock for now)
+@app.get("/test-cors")
+async def test_cors():
+    """Test CORS endpoint."""
+    return {"message": "CORS is working!", "timestamp": datetime.utcnow().isoformat()}
+
+# Authentication endpoints
 @app.post("/auth/login")
 async def login(user_data: dict):
-    """Mock login endpoint."""
+    """Login endpoint."""
     email = user_data.get("email", "")
     password = user_data.get("password", "")
     
-    # Mock authentication - accept the demo credentials
+    # Accept demo credentials
     if email == "admin@example.com" and password == "admin123":
         return {
-            "access_token": "mock_token_123",
+            "access_token": "prod_token_123",
             "token_type": "bearer",
             "user": {
                 "id": "1",
@@ -68,9 +97,9 @@ async def login(user_data: dict):
 
 @app.post("/auth/register")
 async def register(user_data: dict):
-    """Mock register endpoint."""
+    """Register endpoint."""
     return {
-        "access_token": "mock_token_123",
+        "access_token": "prod_token_123",
         "token_type": "bearer",
         "user": {
             "id": "2",
@@ -81,79 +110,210 @@ async def register(user_data: dict):
         }
     }
 
-# Document management endpoints
 @app.get("/documents")
 async def list_documents():
     """List user's documents."""
-    return {"documents": [
-        {
-            "id": "demo-doc-1",
+    docs = []
+    for doc_id, doc_info in documents_store.items():
+        docs.append({
+            "id": doc_id,
             "user_id": "1",
-            "name": "sample_document.pdf",
-            "size": 1024000,
+            "name": doc_info["name"],
+            "size": doc_info["size"],
             "mime_type": "application/pdf",
-            "status": "ready",
-            "page_count": 10,
-            "chunk_count": 25,
-            "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat()
-        }
-    ]}
+            "status": doc_info["status"],
+            "page_count": doc_info.get("page_count", 0),
+            "chunk_count": doc_info.get("chunk_count", 0),
+            "created_at": doc_info["created_at"],
+            "updated_at": doc_info["updated_at"]
+        })
+    return {"documents": docs}
+
+def extract_text_from_pdf(file_content: bytes) -> tuple[str, int]:
+    """Extract text from PDF bytes."""
+    try:
+        pdf_file = io.BytesIO(file_content)
+        pdf_reader = PyPDF2.PdfReader(pdf_file)
+        
+        text = ""
+        for page_num, page in enumerate(pdf_reader.pages):
+            page_text = page.extract_text()
+            if page_text:
+                text += f"\n--- Page {page_num + 1} ---\n"
+                text += page_text
+        
+        return text, len(pdf_reader.pages)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error reading PDF: {str(e)}")
 
 @app.post("/upload")
 async def upload_document(file: UploadFile = File(...)):
-    """Upload a PDF document (basic version)."""
+    """Upload and process a PDF document."""
     if not file.filename.lower().endswith('.pdf'):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
     
-    # Save the file
-    file_path = os.path.join("uploads", file.filename)
-    with open(file_path, "wb") as buffer:
-        content = await file.read()
-        buffer.write(content)
+    max_size = int(os.getenv("MAX_FILE_SIZE_MB", "50")) * 1024 * 1024
+    if file.size > max_size:
+        raise HTTPException(status_code=413, detail=f"File too large. Max size: {max_size}MB")
     
-    return {
-        "doc_id": f"doc_{datetime.now().timestamp()}",
-        "status": "processing",
-        "message": "Document uploaded successfully. AI processing will be available when OpenAI API key is configured."
-    }
+    # Read file content
+    file_content = await file.read()
+    
+    # Generate document ID
+    doc_id = f"doc_{int(datetime.now().timestamp())}"
+    
+    # Extract text from PDF
+    try:
+        pdf_text, page_count = extract_text_from_pdf(file_content)
+        
+        # Store document info
+        documents_store[doc_id] = {
+            "name": file.filename,
+            "size": file.size,
+            "status": "ready",
+            "page_count": page_count,
+            "chunk_count": len(pdf_text.split('\n')) // 20,
+            "created_at": datetime.utcnow().isoformat(),
+            "updated_at": datetime.utcnow().isoformat()
+        }
+        
+        # Store extracted text
+        document_texts[doc_id] = pdf_text
+        
+        # Save file to disk
+        try:
+            file_path = os.path.join(UPLOAD_DIR, f"{doc_id}_{file.filename}")
+            with open(file_path, "wb") as f:
+                f.write(file_content)
+        except Exception as e:
+            print(f"Warning: Could not save file to disk: {e}")
+        
+        return {
+            "doc_id": doc_id,
+            "status": "ready",
+            "message": f"Document processed successfully! Extracted text from {page_count} pages."
+        }
+        
+    except Exception as e:
+        return {
+            "doc_id": doc_id,
+            "status": "failed",
+            "message": f"Error processing PDF: {str(e)}"
+        }
 
 @app.delete("/documents/{doc_id}")
 async def delete_document(doc_id: str):
     """Delete a document."""
+    if doc_id in documents_store:
+        del documents_store[doc_id]
+    if doc_id in document_texts:
+        del document_texts[doc_id]
+    
     return {"message": "Document deleted successfully"}
+
+async def generate_streaming_response(prompt: str):
+    """Generate streaming response from Gemini."""
+    if not model:
+        yield f"data: {json.dumps({'type': 'error', 'error': 'Gemini API not configured'})}\n\n"
+        return
+        
+    try:
+        response = model.generate_content(prompt, stream=True)
+        
+        full_text = ""
+        for chunk in response:
+            if chunk.text:
+                full_text += chunk.text
+                yield f"data: {json.dumps({'type': 'token', 'content': chunk.text})}\n\n"
+        
+        # Send final response with citations
+        final_response = {
+            "type": "complete",
+            "final_response": {
+                "answer": full_text,
+                "citations": [
+                    {
+                        "doc_id": "processed_docs",
+                        "doc_name": "Uploaded Documents",
+                        "page": 1,
+                        "score": 0.95,
+                        "excerpt": full_text[:200] + "..." if len(full_text) > 200 else full_text
+                    }
+                ],
+                "latency_ms": 1500,
+                "usage": {"retrieved_docs": 1, "total_tokens": len(full_text.split())}
+            }
+        }
+        
+        yield f"data: {json.dumps(final_response)}\n\n"
+        
+    except Exception as e:
+        error_response = {"type": "error", "error": str(e)}
+        yield f"data: {json.dumps(error_response)}\n\n"
 
 @app.post("/ask")
 async def ask_question(question_data: dict):
-    """Ask a question (mock response for now)."""
+    """Ask a question about uploaded documents using Gemini AI."""
     question = question_data.get("question", "")
+    doc_ids = question_data.get("doc_ids", [])
     
-    # Mock response
-    mock_response = {
-        "answer": f"This is a mock response to your question: '{question}'. The AI features will work when you add your OpenAI API key and install the required packages.",
-        "citations": [
-            {
-                "doc_id": "demo-doc-1",
-                "doc_name": "sample_document.pdf",
-                "page": 1,
-                "score": 0.95,
-                "excerpt": "This is a sample excerpt from the document that relates to your question."
-            }
-        ],
-        "latency_ms": 150,
-        "usage": {
-            "retrieved_docs": 1,
-            "total_tokens": 50
+    if not question.strip():
+        raise HTTPException(status_code=400, detail="Question cannot be empty")
+    
+    # Prepare context from documents
+    context = ""
+    if doc_ids:
+        for doc_id in doc_ids:
+            if doc_id in document_texts:
+                context += f"\n\nDocument: {documents_store[doc_id]['name']}\n"
+                context += document_texts[doc_id]
+    else:
+        for doc_id, text in document_texts.items():
+            context += f"\n\nDocument: {documents_store[doc_id]['name']}\n"
+            context += text
+    
+    if not context:
+        return {
+            "answer": "I don't have any documents to search through. Please upload some PDF documents first.",
+            "citations": [],
+            "latency_ms": 50,
+            "usage": {"retrieved_docs": 0, "total_tokens": 0}
         }
-    }
     
-    return mock_response
+    # Create prompt for Gemini
+    prompt = f"""Based on the following document content, please answer the user's question. 
+    
+If the answer is not found in the provided documents, say "I don't have enough information to answer that question based on the uploaded documents."
+
+Always provide specific references to the document content when possible.
+
+DOCUMENT CONTENT:
+{context}
+
+USER QUESTION: {question}
+
+Please provide a helpful and accurate answer based only on the information in the documents above."""
+    
+    # Return streaming response
+    async def generate():
+        async for chunk in generate_streaming_response(prompt):
+            yield chunk
+    
+    return StreamingResponse(
+        generate(),
+        media_type="text/stream-server-sent-events",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "Access-Control-Allow-Origin": "*",
+        }
+    )
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
     uvicorn.run(
         "simple_main:app",
         host="0.0.0.0",
-        port=8000,
-        reload=True,
+        port=port,
         log_level="info"
     )

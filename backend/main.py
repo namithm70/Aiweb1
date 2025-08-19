@@ -92,6 +92,11 @@ async def health_check():
     """Health check endpoint."""
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
 
+@app.get("/test-cors")
+async def test_cors():
+    """Test CORS endpoint."""
+    return {"message": "CORS is working!", "timestamp": datetime.utcnow().isoformat()}
+
 
 # Authentication endpoints
 @app.post("/auth/register")
@@ -123,6 +128,19 @@ async def login(user_data: dict):
         return {"access_token": token, "token_type": "bearer", "user": user.dict()}
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
+
+@app.post("/auth/register")
+async def register(user_data: dict):
+    """Register a new user."""
+    try:
+        user = await auth_manager.create_user(
+            email=user_data["email"],
+            password=user_data["password"]
+        )
+        token = auth_manager.create_access_token({"sub": user.email})
+        return {"access_token": token, "token_type": "bearer", "user": user.dict()}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # Document management endpoints
