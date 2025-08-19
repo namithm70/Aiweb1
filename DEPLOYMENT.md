@@ -31,12 +31,12 @@ Deploy your PDF-QA application with frontend on Vercel and backend on Render.
 - **Name**: `pdf-qa-backend`
 - **Region**: `Oregon (US West)` or closest to your users
 - **Branch**: `main`
-- **Root Directory**: `backend`
+- **Root Directory**: **Leave EMPTY** (uses root-level Dockerfile)
 
 **Build & Deploy:**
-- **Runtime**: `Python 3`
-- **Build Command**: `pip install -r requirements.txt`
-- **Start Command**: `python production_main.py`
+- **Runtime**: `Docker` (Recommended) OR `Python 3`
+- **Build Command**: *(Leave empty for Docker)* OR `pip install -r backend/requirements.txt`
+- **Start Command**: *(Leave empty for Docker)* OR `python backend/gemini_main.py`
 
 ### 1.4 Environment Variables
 Click **"Advanced"** and add these environment variables:
