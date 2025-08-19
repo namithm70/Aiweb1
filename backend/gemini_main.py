@@ -32,14 +32,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware
+# CORS middleware - Allow specific origins for production
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000", 
-        "http://127.0.0.1:3000",
-        "https://*.vercel.app",  # Allow all Vercel domains
-        "https://*.onrender.com"  # Allow Render domains
+        "https://aiweb1.vercel.app",  # Your Vercel frontend
+        "https://aiweb1-git-main-namithm70.vercel.app",  # Vercel preview deployments
+        "http://localhost:3000",  # For local development
+        "http://127.0.0.1:3000"   # For local development
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -57,10 +57,16 @@ document_texts = {}
 async def root():
     """Root endpoint."""
     return {
-        "message": "PDF-QA with Gemini AI", 
-        "version": "1.0.0",
+        "message": "PDF-QA with Gemini AI - CORS Fixed", 
+        "version": "1.0.1",
         "status": "running",
         "ai_model": config.GEMINI_MODEL,
+        "cors_enabled": True,
+        "allowed_origins": [
+            "https://aiweb1.vercel.app",
+            "https://aiweb1-git-main-namithm70.vercel.app",
+            "http://localhost:3000"
+        ],
         "timestamp": datetime.utcnow().isoformat()
     }
 
