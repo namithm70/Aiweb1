@@ -26,29 +26,10 @@ const Dashboard = () => {
   const { documents, loading: docsLoading, processingCount, readyCount, failedCount } = useDocuments();
   const router = useRouter();
 
-  // Temporary login function that bypasses backend
-  const handleTemporaryLogin = () => {
-    // Create a mock user object
-    const mockUser = {
-      id: "temp_user_1",
-      email: "demo@example.com",
-      role: "admin",
-      created_at: new Date().toISOString(),
-      is_active: true
-    };
-    
-    // Store in localStorage to persist the session
-    localStorage.setItem('auth_token', 'temp_token_123');
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    
-    // Force a page reload to update the auth state
-    window.location.reload();
-  };
-
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      // Don't redirect automatically, show the temporary login option
+      router.push('/login');
     }
   }, [user, authLoading, router]);
 
@@ -66,55 +47,7 @@ const Dashboard = () => {
   }
 
   if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center relative">
-        <div className="text-center">
-          <div className="glass-card p-8 max-w-md">
-            <div className="mb-6">
-              <SparklesIcon className="h-16 w-16 text-white mx-auto mb-4" />
-              <h1 className="text-3xl font-bold gradient-text mb-2">
-                Welcome to PDF-QA
-              </h1>
-              <p className="text-white/80 text-lg">
-                Your AI-powered document workspace
-              </p>
-            </div>
-            
-            <div className="space-y-4">
-              <button
-                onClick={handleTemporaryLogin}
-                className="w-full btn btn-primary glow text-lg py-3"
-              >
-                🚀 Try Demo (No Backend Required)
-              </button>
-              
-              <div className="text-center">
-                <p className="text-white/60 text-sm mb-2">Or</p>
-                <Link
-                  href="/login"
-                  className="text-white/80 hover:text-white underline text-sm"
-                >
-                  Login with Backend
-                </Link>
-              </div>
-            </div>
-            
-            <div className="mt-6 p-4 glass-dark rounded-lg">
-              <p className="text-white/70 text-sm">
-                <strong>Demo Features:</strong>
-              </p>
-              <ul className="text-white/60 text-sm mt-2 space-y-1">
-                <li>• View the complete UI interface</li>
-                <li>• Navigate between pages</li>
-                <li>• See the dashboard layout</li>
-                <li>• Explore document management</li>
-                <li>• Check out the chat interface</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return null; // Will redirect to login
   }
 
   const recentDocuments = documents
