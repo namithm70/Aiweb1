@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useDropzone } from 'react-dropzone';
-import { useAuth } from '../hooks/useAuth';
-import { useDocuments } from '../hooks/useDocuments';
+import { useAuth } from '@/hooks/useAuth';
+import { useDocuments } from '@/hooks/useDocuments';
 import { 
   CloudArrowUpIcon,
   DocumentTextIcon,
@@ -14,9 +14,9 @@ import {
   ClockIcon,
   XCircleIcon
 } from '@heroicons/react/24/outline';
-import { formatFileSize, formatDate } from '../lib/api';
-import { Document } from '../types';
-import Layout from '../components/Layout';
+import { formatFileSize, formatDate } from '@/lib/api';
+import { Document } from '@/types';
+import Layout from '@/components/Layout';
 
 const DocumentsPage = () => {
   const { user, loading: authLoading } = useAuth();

@@ -3,9 +3,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import ReactMarkdown from 'react-markdown';
-import { useAuth } from '../hooks/useAuth';
-import { useDocuments } from '../hooks/useDocuments';
-import { useChat } from '../hooks/useChat';
+import { useAuth } from '@/hooks/useAuth';
+import { useDocuments } from '@/hooks/useDocuments';
+import { useChat } from '@/hooks/useChat';
 import { 
   PaperAirplaneIcon,
   DocumentTextIcon,
@@ -15,8 +15,8 @@ import {
   ArrowPathIcon,
   ClipboardDocumentIcon
 } from '@heroicons/react/24/outline';
-import { ChatMessage, Citation } from '../types';
-import Layout from '../components/Layout';
+import { ChatMessage, Citation } from '@/types';
+import Layout from '@/components/Layout';
 
 const ChatPage = () => {
   const { user, loading: authLoading } = useAuth();
