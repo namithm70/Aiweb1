@@ -27,10 +27,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const savedToken = localStorage.getItem('auth_token');
       const savedUser = localStorage.getItem('user');
       
-      if (savedToken) {
+      if (savedToken && savedUser) {
         try {
           setAuthToken(savedToken);
-          const user = await authApi.getCurrentUser();
+          const user = JSON.parse(savedUser);
           setState({
             user,
             token: savedToken,
@@ -38,8 +38,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             error: undefined,
           });
         } catch (error) {
-          // Token is invalid
+          // Token or user data is invalid
           setAuthToken(null);
+          localStorage.removeItem('user');
           setState({
             user: null,
             token: null,
@@ -61,6 +62,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await authApi.login(email, password);
       setAuthToken(response.access_token);
+      
+      // Save user to localStorage
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
       setState({
         user: response.user,
         token: response.access_token,
@@ -84,6 +89,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await authApi.register(email, password);
       setAuthToken(response.access_token);
+      
+      // Save user to localStorage
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
       setState({
         user: response.user,
         token: response.access_token,
@@ -103,6 +112,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     setAuthToken(null);
+    localStorage.removeItem('user');
     setState({
       user: null,
       token: null,
