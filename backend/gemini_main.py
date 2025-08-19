@@ -326,12 +326,29 @@ async def ask_question(question_data: dict):
             context += text
     
     if not context:
-        return {
-            "answer": "I don't have any documents to search through. Please upload some PDF documents first.",
-            "citations": [],
-            "latency_ms": 50,
-            "usage": {"retrieved_docs": 0, "total_tokens": 0}
-        }
+        # Return streaming response even when no documents
+        async def generate_no_docs():
+            yield f"data: {json.dumps({'type': 'token', 'content': 'I don\'t have any documents to search through. Please upload some PDF documents first.'})}\n\n"
+            final_response = {
+                "type": "complete",
+                "final_response": {
+                    "answer": "I don't have any documents to search through. Please upload some PDF documents first.",
+                    "citations": [],
+                    "latency_ms": 50,
+                    "usage": {"retrieved_docs": 0, "total_tokens": 0}
+                }
+            }
+            yield f"data: {json.dumps(final_response)}\n\n"
+        
+        return StreamingResponse(
+            generate_no_docs(),
+            media_type="text/stream-server-sent-events",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "Access-Control-Allow-Origin": "*",
+            }
+        )
     
     # Create prompt for Gemini
     prompt = f"""Based on the following document content, please answer the user's question. 
