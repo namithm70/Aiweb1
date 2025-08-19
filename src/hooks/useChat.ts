@@ -1,8 +1,8 @@
 // Chat management hook
 
 import { useState, useCallback } from 'react';
-import { ChatMessage, ChatState, QuestionRequest, Citation } from '@/types';
-import { chatApi, handleApiError } from '@/lib/api';
+import { ChatMessage, ChatState, QuestionRequest, Citation } from '../types';
+import { chatApi, handleApiError } from '../lib/api';
 
 export const useChat = () => {
   const [state, setState] = useState<ChatState>({

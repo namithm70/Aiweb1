@@ -1,8 +1,8 @@
 // Documents management hook
 
 import { useState, useEffect } from 'react';
-import { Document, DocumentListState } from '@/types';
-import { documentApi, handleApiError } from '@/lib/api';
+import { Document, DocumentListState } from '../types';
+import { documentApi, handleApiError } from '../lib/api';
 
 export const useDocuments = () => {
   const [state, setState] = useState<DocumentListState>({
