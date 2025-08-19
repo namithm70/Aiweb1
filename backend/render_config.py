@@ -34,7 +34,8 @@ class RenderConfig:
         
         # CORS settings for production
         self.CORS_ORIGINS = [
-            "https://pdf-qa-frontend-xxxx.vercel.app",  # Replace with your Vercel URL
+            "https://aiweb1.vercel.app",  # Your Vercel frontend
+            "https://aiweb1-git-main-namithm70.vercel.app",  # Vercel preview deployments
             "http://localhost:3000",  # For development
             "http://127.0.0.1:3000"
         ]

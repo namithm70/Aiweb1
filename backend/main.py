@@ -38,7 +38,13 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # Frontend URLs
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://127.0.0.1:3000",
+        "https://aiweb1.vercel.app",  # Vercel frontend
+        "https://aiweb1-git-main-namithm70.vercel.app",  # Vercel preview deployments
+        "https://*.vercel.app"  # All Vercel subdomains
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
