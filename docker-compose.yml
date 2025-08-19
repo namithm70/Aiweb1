@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SECRET_KEY=${SECRET_KEY:-your_super_secret_jwt_key_here_minimum_32_characters}
+      - DATABASE_URL=sqlite:///./pdf_qa.db
+      - UPLOAD_DIR=/app/uploads
+      - VECTOR_DB_PERSIST_DIR=/app/chroma_db
+      - DEBUG=true
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./backend/chroma_db:/app/chroma_db
+      - ./backend/pdf_qa.db:/app/pdf_qa.db
+    depends_on:
+      - chroma
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+
+  # Chroma Vector Database (optional - can use embedded mode)
+  chroma:
+    image: ghcr.io/chroma-core/chroma:latest
+    ports:
+      - "6333:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - CHROMA_SERVER_AUTHN_CREDENTIALS_FILE=/chroma/auth.txt
+      - CHROMA_SERVER_AUTHN_PROVIDER=chromadb.auth.basic_authn.BasicAuthProvider
+    command: ["chroma", "run", "--host", "0.0.0.0", "--port", "8000"]
+
+volumes:
+  chroma_data:
+    driver: local
