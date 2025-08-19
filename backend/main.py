@@ -35,10 +35,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware - Allow all origins for development/production
+# CORS middleware - Allow specific origins for production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for now
+    allow_origins=[
+        "https://aiweb1.vercel.app",  # Your Vercel frontend
+        "https://aiweb1-git-main-namithm70.vercel.app",  # Vercel preview deployments
+        "http://localhost:3000",  # For local development
+        "http://127.0.0.1:3000"   # For local development
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -80,9 +85,15 @@ async def startup_event():
 async def root():
     """Root endpoint."""
     return {
-        "message": "PDF-QA with RAG API - Updated", 
-        "version": "1.0.1",
+        "message": "PDF-QA with RAG API - CORS Fixed", 
+        "version": "1.0.2",
         "status": "running",
+        "cors_enabled": True,
+        "allowed_origins": [
+            "https://aiweb1.vercel.app",
+            "https://aiweb1-git-main-namithm70.vercel.app",
+            "http://localhost:3000"
+        ],
         "timestamp": datetime.utcnow().isoformat()
     }
 
