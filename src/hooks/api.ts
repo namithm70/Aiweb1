@@ -10,7 +10,7 @@ import {
   ApiError 
 } from '../types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://aiweb1-c965.onrender.com';
 
 // Create axios instance with default config
 const api = axios.create({
