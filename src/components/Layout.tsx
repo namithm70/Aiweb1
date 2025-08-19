@@ -1,7 +1,7 @@
 // Modern Layout with Glassmorphism Design
 
 import React, { ReactNode, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '../hooks/useAuth';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { 
