@@ -35,14 +35,14 @@ const Dashboard = () => {
 
   if (authLoading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-64">
-          <div className="glass-card p-8 text-center">
+      <div className="min-h-screen flex items-center justify-center relative">
+        <div className="text-center">
+          <div className="glass-card p-8">
             <div className="spinner mx-auto mb-4"></div>
             <p className="text-white/80 text-lg">Loading your workspace...</p>
           </div>
         </div>
-      </Layout>
+      </div>
     );
   }
 

@@ -1,14 +1,14 @@
 import type { AppProps } from 'next/app';
 import { AuthProvider } from '@/hooks/useAuth';
-import Layout from '@/components/Layout';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import '@/styles/globals.css';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <AuthProvider>
-      <Layout>
+    <ErrorBoundary>
+      <AuthProvider>
         <Component {...pageProps} />
-      </Layout>
-    </AuthProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

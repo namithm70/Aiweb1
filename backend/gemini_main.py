@@ -35,7 +35,12 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://127.0.0.1:3000",
+        "https://*.vercel.app",  # Allow all Vercel domains
+        "https://*.onrender.com"  # Allow Render domains
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -102,6 +107,19 @@ async def register(user_data: dict):
         }
     }
 
+@app.get("/auth/me")
+async def get_current_user():
+    """Get current user endpoint."""
+    # For demo purposes, return a default user
+    # In production, this would validate the JWT token
+    return {
+        "id": "1",
+        "email": "admin@example.com",
+        "role": "admin",
+        "created_at": datetime.utcnow().isoformat(),
+        "is_active": True
+    }
+
 @app.get("/documents")
 async def list_documents():
     """List user's documents."""
@@ -141,6 +159,9 @@ def extract_text_from_pdf(file_content: bytes) -> tuple[str, int]:
 @app.post("/upload")
 async def upload_document(file: UploadFile = File(...)):
     """Upload and process a PDF document."""
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+    
     if not file.filename.lower().endswith('.pdf'):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
     
@@ -148,7 +169,10 @@ async def upload_document(file: UploadFile = File(...)):
         raise HTTPException(status_code=413, detail=f"File too large. Max size: {config.MAX_FILE_SIZE_MB}MB")
     
     # Read file content
-    file_content = await file.read()
+    try:
+        file_content = await file.read()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error reading file: {str(e)}")
     
     # Generate document ID
     doc_id = f"doc_{int(datetime.now().timestamp())}"
@@ -156,6 +180,13 @@ async def upload_document(file: UploadFile = File(...)):
     # Extract text from PDF
     try:
         pdf_text, page_count = extract_text_from_pdf(file_content)
+        
+        if not pdf_text.strip():
+            return {
+                "doc_id": doc_id,
+                "status": "failed",
+                "message": "No text could be extracted from the PDF. The file might be scanned images or corrupted."
+            }
         
         # Store document info
         documents_store[doc_id] = {
@@ -172,9 +203,13 @@ async def upload_document(file: UploadFile = File(...)):
         document_texts[doc_id] = pdf_text
         
         # Save file to disk
-        file_path = os.path.join(config.UPLOAD_DIR, f"{doc_id}_{file.filename}")
-        with open(file_path, "wb") as f:
-            f.write(file_content)
+        try:
+            file_path = os.path.join(config.UPLOAD_DIR, f"{doc_id}_{file.filename}")
+            with open(file_path, "wb") as f:
+                f.write(file_content)
+        except Exception as e:
+            # File save failed, but we still have the text in memory
+            print(f"Warning: Failed to save file to disk: {e}")
         
         return {
             "doc_id": doc_id,
@@ -188,6 +223,26 @@ async def upload_document(file: UploadFile = File(...)):
             "status": "failed",
             "message": f"Error processing PDF: {str(e)}"
         }
+
+@app.get("/documents/{doc_id}")
+async def get_document(doc_id: str):
+    """Get a specific document."""
+    if doc_id not in documents_store:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    doc_info = documents_store[doc_id]
+    return {
+        "id": doc_id,
+        "user_id": "1",
+        "name": doc_info["name"],
+        "size": doc_info["size"],
+        "mime_type": "application/pdf",
+        "status": doc_info["status"],
+        "page_count": doc_info.get("page_count", 0),
+        "chunk_count": doc_info.get("chunk_count", 0),
+        "created_at": doc_info["created_at"],
+        "updated_at": doc_info["updated_at"]
+    }
 
 @app.delete("/documents/{doc_id}")
 async def delete_document(doc_id: str):
@@ -259,7 +314,7 @@ async def ask_question(question_data: dict):
                 context += f"\n\nDocument: {documents_store[doc_id]['name']}\n"
                 context += document_texts[doc_id]
     else:
-        # Use all documents
+        # Use all available documents
         for doc_id, text in document_texts.items():
             context += f"\n\nDocument: {documents_store[doc_id]['name']}\n"
             context += text

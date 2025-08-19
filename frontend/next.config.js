@@ -18,6 +18,10 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
   },
+  // Ensure environment variables are available at build time
+  experimental: {
+    esmExternals: false,
+  },
   // Production optimizations
   trailingSlash: false,
   poweredByHeader: false,
