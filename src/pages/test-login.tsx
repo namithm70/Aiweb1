@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { authApi } from '../hooks/api';
+import { authApi, chatApi } from '../hooks/api';
 
 const TestLoginPage = () => {
   const [result, setResult] = useState<string>('');
@@ -11,7 +11,7 @@ const TestLoginPage = () => {
     
     try {
       const response = await authApi.login('admin@example.com', 'admin123');
-      setResult(`✅ Login successful! User: ${JSON.stringify(response.user, null, 2)}`);
+      setResult(`✅ Login successful! User: ${JSON.stringify(response.user, null, 2)}\nToken: ${response.access_token}`);
     } catch (error: any) {
       setResult(`❌ Login failed: ${error.message || error}`);
       console.error('Login error:', error);
@@ -35,10 +35,50 @@ const TestLoginPage = () => {
     }
   };
 
+  const testChat = async () => {
+    setLoading(true);
+    setResult('Testing chat...');
+    
+    try {
+      // First login to get token
+      const loginResponse = await authApi.login('admin@example.com', 'admin123');
+      setResult(`✅ Login successful! Testing chat with token: ${loginResponse.access_token.substring(0, 20)}...`);
+      
+      // Test chat
+      const stream = await chatApi.askQuestion({
+        question: "Hello, this is a test question",
+        doc_ids: [],
+        k: 6
+      });
+      
+      setResult(`✅ Chat stream created successfully! Stream type: ${typeof stream}`);
+      
+      // Try to read the stream
+      const reader = stream.getReader();
+      const decoder = new TextDecoder();
+      let fullResponse = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value);
+        fullResponse += chunk;
+        setResult(`✅ Chat response: ${fullResponse.substring(0, 200)}...`);
+      }
+      
+    } catch (error: any) {
+      setResult(`❌ Chat failed: ${error.message || error}`);
+      console.error('Chat error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Login Test Page</h1>
+        <h1 className="text-3xl font-bold mb-8">Login & Chat Test Page</h1>
         
         <div className="space-y-4">
           <button
@@ -55,6 +95,14 @@ const TestLoginPage = () => {
             className="bg-green-500 text-white px-4 py-2 rounded disabled:opacity-50 ml-4"
           >
             Test Login
+          </button>
+          
+          <button
+            onClick={testChat}
+            disabled={loading}
+            className="bg-purple-500 text-white px-4 py-2 rounded disabled:opacity-50 ml-4"
+          >
+            Test Chat
           </button>
         </div>
         
