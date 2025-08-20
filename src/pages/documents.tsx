@@ -1,4 +1,4 @@
-// Documents management page
+// Documents management page with Glassmorphism Design
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
@@ -12,7 +12,9 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   ClockIcon,
-  XCircleIcon
+  XCircleIcon,
+  SparklesIcon,
+  DocumentArrowUpIcon
 } from '@heroicons/react/24/outline';
 import { formatFileSize, formatDate } from '../hooks/api';
 import { Document } from '../types';
@@ -88,253 +90,224 @@ const DocumentsPage = () => {
   const getStatusIcon = (status: Document['status']) => {
     switch (status) {
       case 'ready':
-        return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
+        return <CheckCircleIcon className="h-5 w-5 text-green-400" />;
       case 'processing':
-        return <ClockIcon className="h-5 w-5 text-yellow-500 animate-pulse" />;
+        return <ClockIcon className="h-5 w-5 text-yellow-400 animate-pulse" />;
       case 'failed':
-        return <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />;
+        return <ExclamationTriangleIcon className="h-5 w-5 text-red-400" />;
       default:
-        return <DocumentTextIcon className="h-5 w-5 text-gray-400" />;
+        return <DocumentTextIcon className="h-5 w-5 text-white/50" />;
     }
   };
 
-  const getStatusBadge = (status: Document['status']) => {
-    const baseClasses = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
-    
+  const getStatusText = (status: Document['status']) => {
     switch (status) {
       case 'ready':
-        return `${baseClasses} bg-green-100 text-green-800`;
+        return 'Ready';
       case 'processing':
-        return `${baseClasses} bg-yellow-100 text-yellow-800`;
+        return 'Processing';
       case 'failed':
-        return `${baseClasses} bg-red-100 text-red-800`;
+        return 'Failed';
       default:
-        return `${baseClasses} bg-gray-100 text-gray-800`;
+        return 'Unknown';
+    }
+  };
+
+  const getStatusColor = (status: Document['status']) => {
+    switch (status) {
+      case 'ready':
+        return 'text-green-300';
+      case 'processing':
+        return 'text-yellow-300';
+      case 'failed':
+        return 'text-red-300';
+      default:
+        return 'text-white/60';
     }
   };
 
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="min-h-screen flex items-center justify-center relative">
         <div className="text-center">
-          <div className="spinner mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="glass-card p-8">
+            <div className="spinner mx-auto mb-4"></div>
+            <p className="text-white/80 text-lg">Loading your documents...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   if (!user) {
-    return null;
+    return null; // Will redirect to login
   }
 
   return (
     <Layout>
       <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Documents</h1>
-        <p className="mt-2 text-gray-600">
-          Upload and manage your PDF documents for analysis.
-        </p>
-      </div>
-
-      {/* Upload Area */}
-      <div className="card p-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Upload Documents</h2>
-        
-        <div
-          {...getRootProps()}
-          className={`upload-area ${isDragActive ? 'active' : ''} ${uploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-        >
-          <input {...getInputProps()} />
-          <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <div className="mt-4">
-            {isDragActive ? (
-              <p className="text-sm text-gray-600">
-                Drop the PDF files here...
+        {/* Header */}
+        <div className="glass-card p-8 floating">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold gradient-text mb-2">
+                Document Library
+              </h1>
+              <p className="text-white/80 text-lg">
+                Upload and manage your PDF documents for AI analysis
               </p>
-            ) : (
-              <div>
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium text-primary-600">Click to upload</span> or drag and drop
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  PDF files only, up to 100MB each
-                </p>
+            </div>
+            <div className="hidden md:block">
+              <div className="glass-button p-4 orange-glow">
+                <DocumentArrowUpIcon className="h-10 w-10 text-white" />
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Upload Progress */}
-        {Object.keys(uploadProgress).length > 0 && (
-          <div className="mt-4 space-y-2">
-            {Object.entries(uploadProgress).map(([fileName, progress]) => (
-              <div key={fileName} className="flex items-center space-x-3">
-                <DocumentTextIcon className="h-5 w-5 text-gray-400" />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {fileName}
-                    </p>
-                    <span className="text-sm text-gray-500">{progress}%</span>
-                  </div>
-                  <div className="mt-1 w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-primary-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Error Display */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="flex">
-            <XCircleIcon className="h-5 w-5 text-red-400" />
-            <div className="ml-3">
-              <p className="text-sm text-red-800">{error}</p>
-              <button
-                onClick={clearError}
-                className="mt-2 text-sm text-red-600 hover:text-red-500 underline"
-              >
-                Dismiss
-              </button>
             </div>
           </div>
         </div>
-      )}
 
-      {/* Documents List */}
-      <div className="card">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">Your Documents</h2>
-        </div>
-        
-        {loading ? (
-          <div className="p-6 text-center">
-            <div className="spinner mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading documents...</p>
+        {/* Upload Area */}
+        <div className="glass-card p-8">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold gradient-text mb-2">
+              Upload Documents
+            </h2>
+            <p className="text-white/70">
+              Drag and drop PDF files here or click to browse
+            </p>
           </div>
-        ) : documents.length > 0 ? (
-          <div className="overflow-hidden">
-            <ul className="divide-y divide-gray-200">
-              {documents.map((document) => (
-                <li key={document.id} className="px-6 py-4 hover:bg-gray-50">
+
+          <div
+            {...getRootProps()}
+            className={`upload-area ${isDragActive ? 'active' : ''} ${uploading ? 'opacity-50' : ''}`}
+          >
+            <input {...getInputProps()} />
+            <div className="space-y-4">
+              <CloudArrowUpIcon className="h-16 w-16 text-white/60 mx-auto" />
+              <div>
+                <p className="text-lg font-medium text-white">
+                  {isDragActive ? 'Drop files here' : 'Drag & drop PDF files here'}
+                </p>
+                <p className="text-white/60 text-sm mt-1">
+                  or click to select files (max 100MB each)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {error && (
+            <div className="glass-card bg-red-500/20 border-red-500/30 p-4 mt-6">
+              <p className="text-red-200 text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Upload Progress */}
+          {Object.keys(uploadProgress).length > 0 && (
+            <div className="mt-6 space-y-3">
+              {Object.entries(uploadProgress).map(([fileName, progress]) => (
+                <div key={fileName} className="glass-button p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-white text-sm font-medium">{fileName}</span>
+                    <span className="text-white/60 text-sm">{progress}%</span>
+                  </div>
+                  <div className="w-full bg-white/20 rounded-full h-2">
+                    <div 
+                      className="bg-gradient-to-r from-orange-400 to-red-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    ></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Documents List */}
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold gradient-text flex items-center">
+              <DocumentTextIcon className="h-6 w-6 mr-2" />
+              Your Documents ({documents.length})
+            </h2>
+          </div>
+
+          {loading ? (
+            <div className="glass-card p-8">
+              <div className="flex items-center justify-center">
+                <div className="spinner mr-3"></div>
+                <span className="text-white/80">Loading documents...</span>
+              </div>
+            </div>
+          ) : documents.length > 0 ? (
+            <div className="grid gap-4">
+              {documents.map((doc) => (
+                <div key={doc.id} className="glass-card p-6 hover:scale-102 transition-all duration-300">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center min-w-0 flex-1">
-                      {getStatusIcon(document.status)}
-                      <div className="ml-4 min-w-0 flex-1">
-                        <div className="flex items-center space-x-2">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {document.name}
-                          </p>
-                          <span className={getStatusBadge(document.status)}>
-                            {document.status}
-                          </span>
+                    <div className="flex items-center flex-1 min-w-0">
+                      <div className="glass-button p-3 mr-4">
+                        <DocumentTextIcon className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-white font-medium truncate">{doc.name}</h3>
+                        <div className="flex items-center space-x-4 text-sm text-white/60 mt-1">
+                          <span>{formatFileSize(doc.size)}</span>
+                          {doc.page_count && <span>{doc.page_count} pages</span>}
+                          <span>{formatDate(doc.updated_at)}</span>
                         </div>
-                        <div className="flex items-center space-x-4 mt-1">
-                          <p className="text-xs text-gray-500">
-                            {formatFileSize(document.size)}
-                          </p>
-                          {document.page_count && (
-                            <p className="text-xs text-gray-500">
-                              {document.page_count} pages
-                            </p>
-                          )}
-                          {document.chunk_count && (
-                            <p className="text-xs text-gray-500">
-                              {document.chunk_count} chunks
-                            </p>
-                          )}
-                          <p className="text-xs text-gray-500">
-                            {formatDate(document.updated_at)}
-                          </p>
-                        </div>
-                        {document.error && (
-                          <p className="text-xs text-red-600 mt-1">
-                            Error: {document.error}
-                          </p>
-                        )}
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2 ml-4">
+                    
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        {getStatusIcon(doc.status)}
+                        <span className={`text-sm font-medium ${getStatusColor(doc.status)}`}>
+                          {getStatusText(doc.status)}
+                        </span>
+                      </div>
+                      
+                      {doc.status === 'ready' && (
+                        <button
+                          onClick={() => router.push(`/chat?doc=${doc.id}`)}
+                          className="btn btn-primary text-sm"
+                        >
+                          Chat
+                        </button>
+                      )}
+                      
                       <button
-                        onClick={() => handleDeleteDocument(document)}
-                        className="p-2 text-gray-400 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 rounded-md"
+                        onClick={() => handleDeleteDocument(doc)}
+                        className="glass-button p-2 text-white/60 hover:text-red-300 hover:bg-red-500/20 transition-all duration-200"
                         title="Delete document"
                       >
-                        <TrashIcon className="h-4 w-4" />
+                        <TrashIcon className="h-5 w-5" />
                       </button>
                     </div>
                   </div>
-                </li>
+                  
+                  {doc.error && (
+                    <div className="mt-4 glass-card bg-red-500/20 border-red-500/30 p-3">
+                      <p className="text-red-200 text-sm">
+                        <ExclamationTriangleIcon className="h-4 w-4 inline mr-1" />
+                        {doc.error}
+                      </p>
+                    </div>
+                  )}
+                </div>
               ))}
-            </ul>
-          </div>
-        ) : (
-          <div className="p-6 text-center">
-            <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No documents</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Upload your first PDF document to get started.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Stats */}
-      {documents.length > 0 && (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <div className="card p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <CheckCircleIcon className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Ready</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {documents.filter(d => d.status === 'ready').length}
-                </p>
-              </div>
             </div>
-          </div>
-          
-          <div className="card p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <ClockIcon className="h-6 w-6 text-yellow-600" />
+          ) : (
+            <div className="glass-card p-12 text-center">
+              <div className="glass-button p-6 mx-auto mb-6 w-24 h-24 flex items-center justify-center">
+                <DocumentTextIcon className="h-12 w-12 text-white" />
               </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Processing</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {documents.filter(d => d.status === 'processing').length}
-                </p>
-              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">
+                No documents yet
+              </h3>
+              <p className="text-white/70 text-lg mb-8 max-w-md mx-auto">
+                Upload your first PDF document to start asking questions and getting AI-powered insights.
+              </p>
             </div>
-          </div>
-          
-          <div className="card p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Failed</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {documents.filter(d => d.status === 'failed').length}
-                </p>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
-      )}
       </div>
     </Layout>
   );

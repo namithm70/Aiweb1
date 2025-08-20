@@ -1,4 +1,4 @@
-// Chat interface page
+// Chat interface page with Glassmorphism Design
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
@@ -13,7 +13,8 @@ import {
   ChatBubbleLeftRightIcon,
   ExclamationTriangleIcon,
   ArrowPathIcon,
-  ClipboardDocumentIcon
+  ClipboardDocumentIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 import { ChatMessage, Citation } from '../types';
 import Layout from '../components/Layout';
@@ -95,191 +96,249 @@ const ChatPage = () => {
 
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="min-h-screen flex items-center justify-center relative">
         <div className="text-center">
-          <div className="spinner mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="glass-card p-8">
+            <div className="spinner mx-auto mb-4"></div>
+            <p className="text-white/80 text-lg">Loading your chat...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   if (!user) {
-    return null;
-  }
-
-  if (readyDocuments.length === 0) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center py-12">
-          <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No documents ready</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Upload and process some PDF documents before you can start chatting.
-          </p>
-          <div className="mt-6">
-            <button
-              onClick={() => router.push('/documents')}
-              className="btn btn-primary"
-            >
-              Upload Documents
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+    return null; // Will redirect to login
   }
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto flex h-[calc(100vh-8rem)]">
-      {/* Document Selector Sidebar */}
-      <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">Document Selection</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            {selectedDocs.length === 0 ? 'All documents' : `${selectedDocs.length} selected`}
-          </p>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="space-y-2">
-            {readyDocuments.map((document) => (
-              <label key={document.id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-gray-50">
-                <input
-                  type="checkbox"
-                  checked={selectedDocs.includes(document.id)}
-                  onChange={() => handleDocumentToggle(document.id)}
-                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {document.name}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {document.page_count} pages • {document.chunk_count} chunks
-                  </p>
-                </div>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {selectedDocs.length > 0 && (
-          <div className="p-4 border-t border-gray-200">
-            <button
-              onClick={() => setSelectedDocs([])}
-              className="w-full btn btn-secondary text-sm"
-            >
-              Clear Selection
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Chat Interface */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex flex-col h-[calc(100vh-200px)]">
         {/* Header */}
-        <div className="p-4 border-b border-gray-200 bg-white">
+        <div className="glass-card p-6 mb-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900">Chat with Documents</h1>
-              <p className="text-sm text-gray-500">
-                Ask questions about your documents and get answers with citations
-              </p>
-            </div>
-            {messages.length > 0 && (
-              <button
-                onClick={clearMessages}
-                className="btn btn-secondary text-sm"
-              >
-                Clear Chat
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.length === 0 ? (
-            <div className="text-center py-12">
-              <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">Start a conversation</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Ask questions about your documents to get started.
-              </p>
-              <div className="mt-4 space-y-2">
-                <p className="text-xs text-gray-400">Example questions:</p>
-                <div className="space-y-1">
-                  <button
-                    onClick={() => setInputValue("What are the main topics covered in these documents?")}
-                    className="block mx-auto text-xs text-primary-600 hover:text-primary-500"
-                  >
-                    "What are the main topics covered in these documents?"
-                  </button>
-                  <button
-                    onClick={() => setInputValue("Can you summarize the key findings?")}
-                    className="block mx-auto text-xs text-primary-600 hover:text-primary-500"
-                  >
-                    "Can you summarize the key findings?"
-                  </button>
-                </div>
+            <div className="flex items-center">
+              <SparklesIcon className="h-8 w-8 text-white mr-3" />
+              <div>
+                <h1 className="text-3xl font-bold gradient-text">AI Chat</h1>
+                <p className="text-white/70">
+                  Ask questions about your documents and get instant AI-powered answers
+                </p>
               </div>
             </div>
-          ) : (
-            <div className="space-y-4">
-              {messages.map((message) => (
-                <MessageComponent
-                  key={message.id}
-                  message={message}
-                  onRetry={() => retryQuestion(message.id)}
-                  onCopy={copyToClipboard}
-                />
-              ))}
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setShowDocumentSelector(!showDocumentSelector)}
+                className="btn btn-secondary text-sm"
+              >
+                <DocumentTextIcon className="h-4 w-4 mr-2" />
+                {selectedDocs.length > 0 ? `${selectedDocs.length} selected` : 'Select Docs'}
+              </button>
+              {messages.length > 0 && (
+                <button
+                  onClick={clearMessages}
+                  className="btn btn-ghost text-sm"
+                >
+                  Clear Chat
+                </button>
+              )}
             </div>
-          )}
-          
-          <div ref={messagesEndRef} />
+          </div>
+        </div>
+
+        {/* Document Selector */}
+        {showDocumentSelector && (
+          <div className="glass-card p-6 mb-6">
+            <h3 className="text-lg font-semibold text-white mb-4">Select Documents to Query</h3>
+            {readyDocuments.length === 0 ? (
+              <p className="text-white/60">No documents available. Please upload some PDFs first.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {readyDocuments.map((doc) => (
+                  <button
+                    key={doc.id}
+                    onClick={() => handleDocumentToggle(doc.id)}
+                    className={`glass-button p-3 text-left transition-all duration-200 ${
+                      selectedDocs.includes(doc.id)
+                        ? 'bg-white/25 border-white/40 orange-glow'
+                        : 'hover:bg-white/10'
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <DocumentTextIcon className="h-5 w-5 text-white mr-2" />
+                      <span className="text-white text-sm truncate">{doc.name}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto mb-6">
+          <div className="space-y-6">
+            {messages.length === 0 ? (
+              <div className="glass-card p-12 text-center">
+                <div className="glass-button p-6 mx-auto mb-6 w-24 h-24 flex items-center justify-center">
+                  <ChatBubbleLeftRightIcon className="h-12 w-12 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  Start a conversation
+                </h3>
+                <p className="text-white/70 text-lg mb-8 max-w-md mx-auto">
+                  Ask questions about your documents and get instant AI-powered answers with citations.
+                </p>
+                {readyDocuments.length === 0 && (
+                  <div className="glass-card bg-yellow-500/20 border-yellow-500/30 p-4">
+                    <p className="text-yellow-200 text-sm">
+                      <ExclamationTriangleIcon className="h-4 w-4 inline mr-1" />
+                      No documents available. Please upload some PDFs first.
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              messages.map((message, index) => (
+                <div
+                  key={message.id}
+                  className={`message ${message.role === 'user' ? 'message-user' : 'message-assistant'}`}
+                >
+                  <div className="flex items-start space-x-3">
+                    <div className="glass-button p-2 rounded-full">
+                      {message.role === 'user' ? (
+                        <UserIcon className="h-5 w-5 text-white" />
+                      ) : (
+                        <SparklesIcon className="h-5 w-5 text-white" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-white/80">
+                          {message.role === 'user' ? 'You' : 'AI Assistant'}
+                        </span>
+                        {message.role === 'assistant' && (
+                          <button
+                            onClick={() => copyToClipboard(message.content)}
+                            className="glass-button p-1 text-white/60 hover:text-white"
+                            title="Copy to clipboard"
+                          >
+                            <ClipboardDocumentIcon className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                      
+                      {message.loading ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="typing-dots">
+                            <div className="typing-dot"></div>
+                            <div className="typing-dot"></div>
+                            <div className="typing-dot"></div>
+                          </div>
+                          <span className="text-white/60 text-sm">AI is thinking...</span>
+                        </div>
+                      ) : (
+                        <div className="prose prose-invert max-w-none">
+                          <ReactMarkdown
+                            components={{
+                              p: ({ children }) => <p className="text-white mb-3">{children}</p>,
+                              strong: ({ children }) => <strong className="text-white font-semibold">{children}</strong>,
+                              em: ({ children }) => <em className="text-white/80 italic">{children}</em>,
+                              code: ({ children }) => (
+                                <code className="bg-white/10 text-white px-2 py-1 rounded text-sm">
+                                  {children}
+                                </code>
+                              ),
+                              pre: ({ children }) => (
+                                <pre className="bg-white/10 text-white p-4 rounded-lg overflow-x-auto">
+                                  {children}
+                                </pre>
+                              ),
+                              ul: ({ children }) => <ul className="text-white list-disc list-inside mb-3">{children}</ul>,
+                              ol: ({ children }) => <ol className="text-white list-decimal list-inside mb-3">{children}</ol>,
+                              li: ({ children }) => <li className="text-white mb-1">{children}</li>,
+                            }}
+                          >
+                            {message.content}
+                          </ReactMarkdown>
+                        </div>
+                      )}
+
+                      {/* Citations */}
+                      {message.citations && message.citations.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-white/10">
+                          <p className="text-white/60 text-sm mb-2">Sources:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {message.citations.map((citation, citationIndex) => (
+                              <button
+                                key={citationIndex}
+                                className="citation"
+                                onClick={() => {
+                                  // Handle citation click - could open document or scroll to specific page
+                                  console.log('Citation clicked:', citation);
+                                }}
+                              >
+                                {citation.doc_name} (p. {citation.page})
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                                             {/* Retry button for failed messages */}
+                       {message.role === 'assistant' && !message.loading && (
+                         <div className="mt-3">
+                           <button
+                             onClick={() => retryQuestion(message.id)}
+                             className="btn btn-ghost text-sm"
+                           >
+                             <ArrowPathIcon className="h-4 w-4 mr-1" />
+                             Retry
+                           </button>
+                         </div>
+                       )}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+            <div ref={messagesEndRef} />
+          </div>
         </div>
 
         {/* Error Display */}
         {chatError && (
-          <div className="mx-4 mb-4 bg-red-50 border border-red-200 rounded-md p-3">
-            <div className="flex items-start">
-              <ExclamationTriangleIcon className="h-5 w-5 text-red-400 mt-0.5" />
-              <div className="ml-3 flex-1">
-                <p className="text-sm text-red-800">{chatError}</p>
-                <button
-                  onClick={clearError}
-                  className="mt-1 text-sm text-red-600 hover:text-red-500 underline"
-                >
-                  Dismiss
-                </button>
-              </div>
+          <div className="glass-card bg-red-500/20 border-red-500/30 p-4 mb-6">
+            <div className="flex items-center">
+              <ExclamationTriangleIcon className="h-5 w-5 text-red-300 mr-2" />
+              <p className="text-red-200 text-sm">{chatError}</p>
             </div>
           </div>
         )}
 
-        {/* Input */}
-        <div className="p-4 border-t border-gray-200 bg-white">
-          <form onSubmit={handleSubmit} className="flex space-x-2">
+        {/* Input Form */}
+        <div className="glass-card p-6">
+          <form onSubmit={handleSubmit} className="flex space-x-4">
             <div className="flex-1 relative">
               <textarea
                 ref={inputRef}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask a question about your documents..."
-                disabled={isWaitingForResponse}
-                rows={1}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed resize-none"
-                style={{ minHeight: '40px', maxHeight: '120px' }}
+                placeholder={
+                  readyDocuments.length === 0
+                    ? "Upload some documents first to start chatting..."
+                    : "Ask a question about your documents..."
+                }
+                disabled={isWaitingForResponse || readyDocuments.length === 0}
+                className="glass-input w-full resize-none focus-ring"
+                rows={3}
               />
             </div>
             <button
               type="submit"
-              disabled={!inputValue.trim() || isWaitingForResponse}
-              className="btn btn-primary px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!inputValue.trim() || isWaitingForResponse || readyDocuments.length === 0}
+              className="btn btn-primary px-6 py-3 disabled:opacity-50"
             >
               {isWaitingForResponse ? (
                 <div className="spinner"></div>
@@ -290,122 +349,7 @@ const ChatPage = () => {
           </form>
         </div>
       </div>
-      </div>
     </Layout>
-  );
-};
-
-// Message Component
-interface MessageComponentProps {
-  message: ChatMessage;
-  onRetry: () => void;
-  onCopy: (text: string) => void;
-}
-
-const MessageComponent: React.FC<MessageComponentProps> = ({ message, onRetry, onCopy }) => {
-  const isUser = message.role === 'user';
-  const isLoading = message.loading;
-
-  return (
-    <div className={`flex space-x-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
-      {!isUser && (
-        <div className="flex-shrink-0 w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
-          <ChatBubbleLeftRightIcon className="h-5 w-5 text-white" />
-        </div>
-      )}
-      
-      <div className={`max-w-3xl ${isUser ? 'message-user' : isLoading ? 'message-loading' : 'message-assistant'}`}>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            {isLoading ? (
-              <div className="flex items-center space-x-2">
-                <div className="typing-dots">
-                  <div className="typing-dot"></div>
-                  <div className="typing-dot"></div>
-                  <div className="typing-dot"></div>
-                </div>
-                <span className="text-sm text-gray-500">Thinking...</span>
-              </div>
-            ) : (
-              <ReactMarkdown 
-                className="prose prose-sm max-w-none"
-                components={{
-                  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                  ul: ({ children }) => <ul className="list-disc list-inside mb-2">{children}</ul>,
-                  ol: ({ children }) => <ol className="list-decimal list-inside mb-2">{children}</ol>,
-                }}
-              >
-                {message.content}
-              </ReactMarkdown>
-            )}
-          </div>
-          
-          {!isLoading && !isUser && (
-            <div className="flex items-center space-x-1 ml-2">
-              <button
-                onClick={() => onCopy(message.content)}
-                className="p-1 text-gray-400 hover:text-gray-600 focus:outline-none"
-                title="Copy message"
-              >
-                <ClipboardDocumentIcon className="h-4 w-4" />
-              </button>
-              <button
-                onClick={onRetry}
-                className="p-1 text-gray-400 hover:text-gray-600 focus:outline-none"
-                title="Retry question"
-              >
-                <ArrowPathIcon className="h-4 w-4" />
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Citations */}
-        {message.citations && message.citations.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-xs font-medium text-gray-700 mb-2">Sources:</p>
-            <div className="space-y-2">
-              {message.citations.map((citation, index) => (
-                <CitationComponent
-                  key={index}
-                  citation={citation}
-                  index={index + 1}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-        
-        <p className="text-xs text-gray-500 mt-2">
-          {new Date(message.timestamp).toLocaleTimeString()}
-        </p>
-      </div>
-
-      {isUser && (
-        <div className="flex-shrink-0 w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-          <UserIcon className="h-5 w-5 text-white" />
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Citation Component
-interface CitationComponentProps {
-  citation: Citation;
-  index: number;
-}
-
-const CitationComponent: React.FC<CitationComponentProps> = ({ citation, index }) => {
-  return (
-    <div className="flex items-start space-x-2 p-2 bg-gray-50 rounded text-xs">
-      <span className="citation">S{index}</span>
-      <div className="flex-1">
-        <p className="font-medium text-gray-700">{citation.doc_name}</p>
-        <p className="text-gray-600 mb-1">Page {citation.page}</p>
-        <p className="text-gray-500 italic">"{citation.excerpt}"</p>
-      </div>
-    </div>
   );
 };
 

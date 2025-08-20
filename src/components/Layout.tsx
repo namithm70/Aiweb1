@@ -43,9 +43,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="min-h-screen relative">
         {/* Floating Background Elements */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-400/10 rounded-full blur-3xl floating"></div>
-          <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl floating" style={{ animationDelay: '-2s' }}></div>
-          <div className="absolute top-1/2 left-3/4 w-80 h-80 bg-pink-400/10 rounded-full blur-3xl floating" style={{ animationDelay: '-4s' }}></div>
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-orange-400/15 rounded-full blur-3xl floating"></div>
+          <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-yellow-400/15 rounded-full blur-3xl floating" style={{ animationDelay: '-2s' }}></div>
+          <div className="absolute top-1/2 left-3/4 w-80 h-80 bg-red-400/15 rounded-full blur-3xl floating" style={{ animationDelay: '-4s' }}></div>
         </div>
         
         <div className="relative z-10">
@@ -59,9 +59,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="min-h-screen relative">
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-400/10 rounded-full blur-3xl floating"></div>
-        <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl floating" style={{ animationDelay: '-2s' }}></div>
-        <div className="absolute top-1/2 left-3/4 w-80 h-80 bg-pink-400/10 rounded-full blur-3xl floating" style={{ animationDelay: '-4s' }}></div>
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-orange-400/15 rounded-full blur-3xl floating"></div>
+        <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-yellow-400/15 rounded-full blur-3xl floating" style={{ animationDelay: '-2s' }}></div>
+        <div className="absolute top-1/2 left-3/4 w-80 h-80 bg-red-400/15 rounded-full blur-3xl floating" style={{ animationDelay: '-4s' }}></div>
       </div>
 
       {/* Mobile sidebar */}
@@ -69,7 +69,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="fixed inset-0 flex z-50">
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
           <div className="relative flex-1 flex flex-col max-w-xs w-full">
-            <div className="glass-dark h-full flex flex-col">
+            <div className="glass-sidebar h-full flex flex-col">
               <div className="absolute top-4 right-4">
                 <button
                   type="button"
@@ -96,9 +96,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         onClick={() => setSidebarOpen(false)}
                         className={`${
                           isActive
-                            ? 'glass-button bg-white/20 text-white'
-                            : 'glass-button hover:bg-white/10 text-white/80 hover:text-white'
-                        } group flex items-center px-4 py-3 text-base font-medium rounded-xl transition-all duration-200`}
+                            ? 'glass-button bg-white/25 text-white orange-glow'
+                            : 'glass-button hover:bg-white/15 text-white/80 hover:text-white'
+                        } group flex items-center px-4 py-3 text-base font-medium rounded-xl transition-all duration-300`}
                       >
                         <span className="text-2xl mr-3">{item.emoji}</span>
                         {item.name}
@@ -114,7 +114,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Desktop sidebar */}
       <div className="hidden lg:flex lg:w-72 lg:flex-col lg:fixed lg:inset-y-0 z-40">
-        <div className="glass-dark h-full flex flex-col m-4 rounded-3xl">
+        <div className="glass-sidebar h-full flex flex-col m-4 rounded-3xl">
           <div className="flex-1 flex flex-col pt-8 pb-4 overflow-y-auto">
             <div className="flex items-center flex-shrink-0 px-8 mb-8">
               <SparklesIcon className="h-10 w-10 text-white mr-4" />
@@ -130,8 +130,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     href={item.href}
                     className={`${
                       isActive
-                        ? 'glass-button bg-white/20 text-white border-white/30 glow'
-                        : 'glass-button hover:bg-white/10 text-white/80 hover:text-white border-white/10 hover:border-white/20'
+                        ? 'glass-button bg-white/25 text-white border-white/35 orange-glow'
+                        : 'glass-button hover:bg-white/15 text-white/80 hover:text-white border-white/15 hover:border-white/25'
                     } group flex items-center px-6 py-4 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-105`}
                   >
                     <span className="text-3xl mr-4">{item.emoji}</span>
@@ -162,7 +162,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="ml-3 glass-button p-2 text-white/80 hover:text-white hover:bg-red-500/20 transition-all duration-200"
+                  className="ml-3 glass-button p-2 text-white/80 hover:text-white hover:bg-red-500/25 transition-all duration-300"
                   title="Sign out"
                 >
                   <ArrowRightOnRectangleIcon className="h-5 w-5" />
@@ -177,7 +177,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="lg:pl-80 flex flex-col flex-1 relative z-10">
         {/* Top bar for mobile */}
         <div className="lg:hidden">
-          <div className="glass fixed top-0 w-full z-30">
+          <div className="glass-nav fixed top-0 w-full z-30">
             <div className="flex items-center justify-between px-4 py-4">
               <button
                 type="button"
@@ -192,7 +192,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
               <button
                 onClick={handleLogout}
-                className="glass-button p-2 text-white/80 hover:text-white hover:bg-red-500/20"
+                className="glass-button p-2 text-white/80 hover:text-white hover:bg-red-500/25"
               >
                 <ArrowRightOnRectangleIcon className="h-5 w-5" />
               </button>

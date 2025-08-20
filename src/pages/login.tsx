@@ -103,135 +103,153 @@ const LoginPage = () => {
                 </div>
                 <div>
                   <h3 className="text-white font-semibold text-lg">Secure & Private</h3>
-                  <p className="text-white/70">Your documents are processed securely</p>
+                  <p className="text-white/70">Your documents are processed securely and privately</p>
                 </div>
               </div>
+            </div>
+          </div>
+          
+          <div className="glass-card p-6">
+            <h3 className="text-white font-semibold text-lg mb-4">🚀 Ready to get started?</h3>
+            <p className="text-white/70 mb-4">Join thousands of users who are already using PDF-QA to extract insights from their documents.</p>
+            <div className="flex items-center space-x-4 text-sm text-white/60">
+              <span>✅ No credit card required</span>
+              <span>✅ Free to start</span>
+              <span>✅ Instant access</span>
             </div>
           </div>
         </div>
 
         {/* Right Side - Login Form */}
-        <div className="w-full max-w-md mx-auto lg:mx-0">
-          <div className="glass-card p-8 hover:scale-105 transition-all duration-500">
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-20 h-20 glass-button rounded-full mb-6 glow">
-                <SparklesIcon className="h-10 w-10 text-white" />
-              </div>
-              <h2 className="text-3xl font-bold gradient-text mb-2">
-                Welcome Back
-              </h2>
-              <p className="text-white/70">
-                Sign in to continue your AI journey
-              </p>
+        <div className="glass-card p-8 max-w-md w-full mx-auto">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center mb-4">
+              <SparklesIcon className="h-10 w-10 text-white mr-3" />
+              <h2 className="text-3xl font-bold gradient-text">Welcome Back</h2>
             </div>
-            
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              <div className="space-y-4">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <EnvelopeIcon className="h-5 w-5 text-white/50" />
-                  </div>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="glass-input w-full pl-10 focus-ring"
-                    placeholder="Enter your email"
-                  />
+            <p className="text-white/70">Sign in to your PDF-QA account</p>
+          </div>
+
+          {error && (
+            <div className="glass-card bg-red-500/20 border-red-500/30 p-4 mb-6">
+              <p className="text-red-200 text-sm">{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-white/80 mb-2">
+                Email Address
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <EnvelopeIcon className="h-5 w-5 text-white/50" />
                 </div>
-                
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <LockClosedIcon className="h-5 w-5 text-white/50" />
-                  </div>
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="glass-input w-full pl-10 pr-12 focus-ring"
-                    placeholder="Enter your password"
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center hover:scale-110 transition-transform"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeSlashIcon className="h-5 w-5 text-white/70 hover:text-white" />
-                    ) : (
-                      <EyeIcon className="h-5 w-5 text-white/70 hover:text-white" />
-                    )}
-                  </button>
-                </div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="glass-input pl-10 w-full focus-ring"
+                  placeholder="Enter your email"
+                />
               </div>
+            </div>
 
-              {error && (
-                <div className="glass-dark p-4 rounded-xl border border-red-400/20">
-                  <p className="text-red-300 text-sm text-center">⚠️ {error}</p>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-white/80 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <LockClosedIcon className="h-5 w-5 text-white/50" />
                 </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isSubmitting || !email || !password}
-                className="btn btn-primary w-full py-4 text-lg font-semibold glow disabled:opacity-50"
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center justify-center">
-                    <div className="spinner mr-3"></div>
-                    Signing in...
-                  </div>
-                ) : (
-                  <>
-                    <SparklesIcon className="h-5 w-5 mr-2" />
-                    Sign In
-                  </>
-                )}
-              </button>
-
-              {/* Quick Demo Access */}
-              <div className="text-center space-y-3">
-                <div className="flex items-center justify-center">
-                  <div className="border-t border-white/20 flex-grow"></div>
-                  <span className="px-4 text-white/60 text-sm">Quick Access</span>
-                  <div className="border-t border-white/20 flex-grow"></div>
-                </div>
-                
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="glass-input pl-10 pr-10 w-full focus-ring"
+                  placeholder="Enter your password"
+                />
                 <button
                   type="button"
-                  onClick={fillDemoCredentials}
-                  className="btn btn-secondary w-full text-sm hover:scale-105"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  🚀 Try Demo Account
+                  {showPassword ? (
+                    <EyeSlashIcon className="h-5 w-5 text-white/50 hover:text-white/80" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5 text-white/50 hover:text-white/80" />
+                  )}
                 </button>
-                
-                <p className="text-xs text-white/60">
-                  Demo: admin@example.com / admin123
-                </p>
               </div>
+            </div>
 
-              <div className="text-center pt-4">
-                <p className="text-white/70">
-                  New to PDF-QA?{' '}
-                  <Link 
-                    href="/register"
-                    className="font-semibold text-white hover:text-white/80 underline transition-colors"
-                  >
-                    Create Account
-                  </Link>
-                </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-white/70">
+                  Remember me
+                </label>
               </div>
-            </form>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="btn btn-primary w-full flex justify-center items-center py-3 text-lg font-semibold"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="spinner mr-2"></div>
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
+              </button>
+            </div>
+
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={fillDemoCredentials}
+                className="btn btn-ghost text-sm hover:underline"
+              >
+                Try Demo Account
+              </button>
+            </div>
+          </form>
+
+          <div className="mt-8 text-center">
+            <p className="text-white/60 text-sm">
+              Don't have an account?{' '}
+              <Link href="/register" className="text-white hover:text-orange-300 font-medium transition-colors">
+                Sign up here
+              </Link>
+            </p>
           </div>
         </div>
+      </div>
+
+      {/* Floating Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-orange-400/15 rounded-full blur-3xl floating"></div>
+        <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-yellow-400/15 rounded-full blur-3xl floating" style={{ animationDelay: '-2s' }}></div>
+        <div className="absolute top-1/2 left-3/4 w-80 h-80 bg-red-400/15 rounded-full blur-3xl floating" style={{ animationDelay: '-4s' }}></div>
       </div>
     </div>
   );
